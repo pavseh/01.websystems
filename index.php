@@ -67,5 +67,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php endforeach; ?>
         <input type="submit" value="Submit">
     </form>
+
+    <h3>Leaderboard:</h3>
+    <?php 
+        $stmt = $pdo->query("SELECT name, score, total_questions, date_created FROM leaderboard ORDER BY score DESC, created_at ASC LIMIT 10")
+        $leaderboard = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($leaderboard) {
+            echo "<ul>";
+            foreach ($leaderboard as $entry) {
+                echo "<li>{$entry['name']} - {$entry['score']}/{$entry['total_questions']} ({$entry['created_at']})</li>";
+
+            }
+            echo "</ul>";
+
+        } else {
+            echo "<p>No scores yet.</p>";
+            
+        }
+    ?>
+
 </body>
 </html>
