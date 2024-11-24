@@ -4,8 +4,8 @@
 <!-- PHP part -->
 <?php
 
-$host = 'localhost';
-$dbname = 'quizform';
+$host = 'localhost:3307';
+$dbname = 'quizdb';
 $username = 'root';
 $password = '';
 
@@ -13,6 +13,7 @@ $password = '';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        echo "Database connected successfully!";
 
     } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
@@ -114,13 +115,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <!-- Show Leaderboard -->
     <h3>Leaderboard:</h3>
     <?php 
-        $stmt = $pdo->query("SELECT name, score, total_questions, date_created FROM leaderboard ORDER BY score DESC, created_at ASC LIMIT 10")
+        $stmt = $pdo->query("SELECT name, score, total_questions, date_created FROM leaderboard ORDER BY score DESC, date_created ASC LIMIT 10");
         $leaderboard = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if ($leaderboard) {
             echo "<ul>";
             foreach ($leaderboard as $entry) {
-                echo "<li>{$entry['name']} - {$entry['score']}/{$entry['total_questions']} ({$entry['created_at']})</li>";
+                echo "<li>{$entry['name']} - {$entry['score']}/{$entry['total_questions']} ({$entry['date_created']})</li>";
 
             }
             echo "</ul>";
