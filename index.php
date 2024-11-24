@@ -53,7 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $name = htmlspecialchars($_POST['name']); // user input
+
+    // Input Name, Score, and shows total questions answered
+    $name = isset($_POST['name']) ? htmlspecialchars($_POST['name']) : 'Anonymous';
     $stmt = $pdo->prepare("INSERT INTO leaderboard (name, score, total_questions) VALUES (:name, :score, :total_questions)");
     $stmt->execute([
         ':name' => $name,
@@ -98,6 +100,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <h1>PHP Quiz</h1>
     <form method="post" action="">
+
+
+        <!-- Input Your Name -->
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required><br>
+
+
         <?php foreach ($questions as $index => $question): ?>
             <fieldset>
                 <legend><?php echo $question['question']; ?></legend>
