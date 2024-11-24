@@ -1,9 +1,24 @@
 <!-- Ivern Bryant C. Buala -->
 <!-- Web Systems -->
 
-<!-- php part -->
-
+<!-- PHP part -->
 <?php
+
+$host = 'localhost';
+$dbname = 'quizform';
+$username = 'root';
+$password = '';
+
+// Connecting to Database
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    } catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
+
 
 // Define questions and answers
 $questions = [
@@ -24,8 +39,10 @@ $questions = [
     ]
 ];
 
+
 // Initialize score
 $score = 0;
+
 
 // Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -34,8 +51,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $score++;
         }
     }
+
+    $name = htmlspecialchars($_POST['name']); // user input
+    $stmt = $pdo->prepare("INSERT INTO leaderboard (name, score, total_questions) VALUES (:name, :score, :total_questions)");
+    $stmt->execute([
+        ':name' => $name,
+        ':score' => $score,
+        ':total_questions' => count($questions)
+    ]);
+
+
+    // Display Score
     echo "<h2>Your Score: $score/" . count($questions) . "</h2>";
     echo '<a href="index.php">Try Again</a>';
+
+    // Display Leaderboard
+    echo "<h3>Leaderboard:</h3>";
+    $stmt = $pdo->query("SELECT name, score, total_questions, date_created FROM leaderboard ORDER BY score DESC, date_created ASC LIMIT 10");
+    $leaderboard = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if($leaderboard) {
+        echo "<ul>";
+        foreach ($leaderboard as $entry) {
+            echo "<li>{$entry['name']} - {$entry['score']}/{$entry['total_questions']} ({$entry['date_created']})</li>";
+        }
+        echo "</ul>";
+    } else {
+        echo "<p>No scores yet.</p>";
+    }
     exit;
 }
 ?>
@@ -68,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="submit" value="Submit">
     </form>
 
+    <!-- Show Leaderboard -->
     <h3>Leaderboard:</h3>
     <?php 
         $stmt = $pdo->query("SELECT name, score, total_questions, date_created FROM leaderboard ORDER BY score DESC, created_at ASC LIMIT 10")
@@ -83,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         } else {
             echo "<p>No scores yet.</p>";
-            
+
         }
     ?>
 
